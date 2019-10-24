@@ -1,0 +1,45 @@
+---
+title: "10-24-19"
+author: "Jackson Kehoe"
+date: "10/24/2019"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+library(sf)
+library(tidyverse)
+```
+
+```{r}
+download.file("https://stacks.stanford.edu/file/druid:hp256wp2687/hp256wp2687_ct_hartford_2019_08_13.rds", destfile = "hartford.rds")
+
+download.file("https://stacks.stanford.edu/file/druid:hp256wp2687/hp256wp2687_ct_hartford_shapefiles_2019_08_13.tgz", destfile = "shapes_hartford.tgz")
+```
+
+```{r}
+hartford <- read_rds("hartford.rds")
+
+hartford <- hartford %>% 
+  filter(officer_id_hash == "09739d95d7") %>%
+  filter(arrest_made) %>%
+  select(lat, lng) %>%
+  drop_na(lat, lng)
+
+untar("shapes_hartford.tgz")
+setwd("/Users/jacksonkehoe/Desktop/10-24-19/ct_hartford_shapefiles")
+shape <- st_read("Hartford_Neighborhoods.shp")
+```
+
+```{r}
+locations <- st_as_sf(hartford, coords = c("lat", "lng"), crs = 4326)
+
+ggplot(shape) + 
+  geom_sf(data = locations)
+
+
+```
+
